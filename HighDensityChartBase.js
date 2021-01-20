@@ -12,6 +12,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
 
                 var lastrow = {};
                 lastrow.row = 0;
+                var id = layout.qInfo.qId;
                
 
                 var app = qlik.currApp(_self);
@@ -23,7 +24,6 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                 await this.getMoreData(_self, lastrow, layout, colcount);
 
                
-
                 await this.createPlotlyPlot($element, layout, _self, qTheme, TESTER, chartType);
 
                
@@ -103,14 +103,14 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
 
                 if (!layout.tooltip.auto) {
 
-                    hypercube.qDimensionInfo[0].qAttrExprInfo.forEach(function (tooltip, key) {
+                    hypercube.qDimensionInfo[0].qAttrExprInfo.forEach(function (tooltip, index) {
 
                         //TooltipLables
                         if ((tooltip.id == "customTooltipTitle" || tooltip.id == "customTooltipDescription") && tooltip.qFallbackTitle != null) {
-                            tooltipLablesTop += '<br>%{customdata[' + key + ']}';
+                            tooltipLablesTop += '<br>%{customdata[' + index + ']}';
 
                         } else if (tooltip.id == "customTooltipExpression"){
-                            tooltipLablesBottom += '<br>' + tooltip.qFallbackTitle + ': %{customdata[' + key + ']}'
+                            tooltipLablesBottom += '<br>' + tooltip.qFallbackTitle + ': %{customdata[' + index + ']}'
                         }
 
                         //tooltipLables += ' %{customdata['+ key + ']}';
@@ -195,28 +195,29 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                 // create data traces
                 tracesMap.forEach(function (coords, key) {
 
-                    // Set Color for each trace
+                    /******  Set Color for each trace **********/
+
                     if (layout.color.auto) {
-                        if (chartType == 'line') {
-                            var scales = getDimensionColorPalette(tracesMap.size - 1);
+                        if (chartType === 'line') {
+                            var scales = getDimensionColorScale(tracesMap.size - 1);
                             color = scales[i % scales.length].trim();
                         } else {
                             color = qTheme.properties.dataColors.primaryColor;
                         }
                     }
-                    else if (layout.color.mode == "primary") {
+                    else if (layout.color.mode === "primary") {
                         if ( layout.color.paletteColor.color != null) {
                             color = layout.color.paletteColor.color;
                         } else {
                             color = qTheme.properties.dataColors.primaryColor;
                         }
                         
-                    } else if (layout.color.mode == "byDimension") {
+                    } else if (layout.color.mode === "byDimension") {
 
                         // line chart color by Dimension with 2 dimensions
                         if (dimColorArray != null ) {
                           
-                            var scales = getDimensionColorPalette(dimColorArray.length - 1);
+                            var scales = getDimensionColorScale(dimColorArray.length - 1);
                             // if dimension expression can't be calculated
                             if (scales !== undefined) {
                                 color = scales[dimColorArray.indexOf(coords[5]) % scales.length].trim();
@@ -225,7 +226,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                             }
 
                         } else {
-                            var scales = getDimensionColorPalette(tracesMap.size - 1);
+                            var scales = getDimensionColorScale(tracesMap.size - 1);
 
                             color = scales[i % scales.length].trim();
                         }
@@ -233,24 +234,11 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                        
 
 
-                    } else if (layout.color.mode == "byMeasure") {
-                        const palettes = qTheme.properties.scales.filter(scale =>
-                            scale.propertyValue == layout.color.measureScheme);
+                    } else if (layout.color.mode === "byMeasure") {
 
                         color = coords[4];
 
-                        var scales;
-
-                        if (palettes.length == 1) {
-                            scales = palettes[0].scale;
-                        } else {
-                            scales = qTheme.properties.scales[0].scale;
-                        }
-
-                        if (Array.isArray(scales[1])) {
-                            // first scale is always "null"
-                            scales = scales[Math.min(color.length, scales.length - 1)];
-                        }
+                        var scales = getMeasureColorScale(color.length);
 
                         var colorscale = [];
                         scales.forEach(function (colorHex, index) {
@@ -258,7 +246,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                             colorscale.push([index / (scales.length - 1), colorHex]);
                         });
 
-                    } else if (layout.color.mode == "byExpression" && layout.color.expressionIsColor) {
+                    } else if (layout.color.mode === "byExpression" && layout.color.expressionIsColor) {
                         if (dimColorArray != null ) {
                             color = coords[5];
                             //key = coords[5];
@@ -267,7 +255,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                         }
                         
 
-                    } else if (layout.color.mode == "byExpression" && !layout.color.expressionIsColor) {
+                    } else if (layout.color.mode === "byExpression" && !layout.color.expressionIsColor) {
                        
                         let colorIndex;
                         let colorsLength;
@@ -281,34 +269,15 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                             colorsLength = tracesMap.size - 1;
                         }
 
-                        var scales;//getDimensionColorPalette(tracesMap.size - 1);
+                        var scales;//getDimensionColorScale(tracesMap.size - 1);
                         if (layout.prop.colorPalette !== null && layout.prop.colorPalette !== '') {
                             scales = layout.prop.colorPalette.split(",");
                         } else {
-                            scales = getDimensionColorPalette(colorsLength);
+                            scales = getDimensionColorScale(colorsLength);
                         }
                     
                         color = scales[colorIndex % scales.length].trim();
                     
-                    }
-
-                    function getDimensionColorPalette(dataColorSize) {
-                        const palettes = qTheme.properties.palettes.data.filter(palette =>
-                            palette.propertyValue == layout.color.dimensionScheme);
-
-                        var scales;
-
-                        if (palettes.length == 1) {
-                            scales = palettes[0].scale;
-                        } else {
-                            scales = qTheme.properties.palettes.data[0].scale;
-                        }
-
-                        if (Array.isArray(scales[0])) {
-                            scales = scales[Math.min(dataColorSize, scales.length - 1)];
-                        }
-
-                        return scales;
                     }
 
 
@@ -321,8 +290,9 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                         mode: layout.pres.mode,
                         name: key,
 
-
                         showlegend: colorscale == null,
+                        connectgaps: layout.pres.line.connectgaps,
+
                         marker: {
                             color: color,
                             /***********/
@@ -345,13 +315,14 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                             },
                             /************/
 
-                            size: layout.pres.marker.size,
-                            opacity: layout.pres.marker.opacity,
+                            size: (chartType==="scatter" || layout.pres.line.showDataPoints ? layout.pres.marker.size : 0),
+                            opacity: (chartType==="scatter" || layout.pres.line.showDataPoints ? layout.pres.marker.opacity : 0),
                             symbol: layout.pres.marker.type,
                             //20201201 cvh 1: commented due to border outside marker
                             line: {
-                                width: layout.pres.marker.lineWidth,
-                                color: layout.pres.marker.lineColor.color
+                                width:  (chartType==="scatter" || layout.pres.line.showDataPoints ? layout.pres.marker.lineWidth : 0),
+                                color: layout.pres.marker.lineColor.color,
+                                
                             }
                             //20201201 cvh 1: end
                         },
@@ -377,6 +348,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                         unselected: {
                             marker: {
                                 opacity: 0.3
+                                
                             }
                         },
 
@@ -388,7 +360,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                         //customdata: [['tooltip 1', 'tooltip 2'], ['tooltip 10']], //20201201 cvh 4: adding custom tooltip
                         customdata: coords[6],
                         qElementNumber: coords[3],
-                        textposition: "middle center",
+                        textposition: "top center",
                         textfont: {
                             color: qTheme.getStyle('object', 'axis.label.value', 'color'),
                             size: qTheme.getStyle('object', 'axis.label.value', 'fontSize')
@@ -433,12 +405,13 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                 function getTooltipSuffix() {
                     let tooltipSuffix;
                     if (chartType === "line") { 
-                        tooltipSuffix = '<br><b>' + '' + ': %{text}</b>' +
-                            '<br>' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{y}';
+                        tooltipSuffix = '<br><b>' + '' + '%{text}</b>' +
+                            '<br>{' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{y}';
                     } else if (chartType === "scatter") {
                         tooltipSuffix = '<br><b>' + dimTitle + ': %{text}</b>' +
                             '<br>' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{x}' +
                             '<br>' + hypercube.qMeasureInfo[1].qFallbackTitle + ': %{y}';
+                            //coords[5];
                         
                     }
                      return tooltipSuffix;
@@ -521,7 +494,12 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                     var s = eventData;
                 });*/
 
+                
                 TESTER.on('plotly_click', function (eventData) {
+
+                    /*if (qlik.navigation.getMode() === qlik.navigation.EDIT) {
+                        return;
+                    }*/
 
                     // on select reduce the opacity of all traces
                     var update = {
@@ -534,6 +512,10 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                 });
                 // select with rectangle and lasso
                 TESTER.on('plotly_selected', function (eventData) {
+
+                   /* if (qlik.navigation.getMode() === qlik.navigation.EDIT) {
+                        return;
+                    }*/
 
                     select(eventData);
 
@@ -600,6 +582,10 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                                         qElementNumber: [qElem]
 
                                     };
+
+                                    if (!layout.color.auto && layout.color.mode === "byMeasure") {
+                                        update.marker.color = update.marker.color[pt.pointIndex];
+                                    }
                                    
                                     Plotly.addTraces(TESTER, update);
                                     _self.$scope.selectedElements.set(qElem, TESTER.data.length - 1);
@@ -675,12 +661,85 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                 }
 
                 function getValueColorbyMeasure(row) {
-                    if (layout.color.mode === "byMeasure") {
+                    if (!layout.color.auto && layout.color.mode === "byMeasure") {
+
                         const isColorExp = (expr) => expr.id === "colorByAlternative";
                         var index = hypercube.qDimensionInfo[dimcount-1].qAttrExprInfo.findIndex(isColorExp);
 
-                        return row[dimcount-1].qAttrExps.qValues[index].qNum;
                         
+
+                        const palettes = qTheme.properties.scales.filter(scale =>
+                            scale.propertyValue == layout.color.measureScheme);
+                        
+                        // determine if the color scale is gradient or class. 
+                        // initially no palette is selected
+                        var paletteType = getMeasurePaletteType();    
+                       
+
+                        if (paletteType === "gradient") {
+                            return row[dimcount-1].qAttrExps.qValues[index].qNum;
+
+                        } else {
+
+                            let qMin = hypercube.qDimensionInfo[dimcount-1].qAttrExprInfo[index].qMin;
+                            let qMax = hypercube.qDimensionInfo[dimcount-1].qAttrExprInfo[index].qMax;
+
+                            let classSize = getMeasureColorScale(rowcount).length;
+                            let classLength = ((qMax - qMin) / classSize);
+                            let classLengthPlus1 = ((qMax - qMin) / (classSize + 1));
+
+                            
+                            let classValue = Math.floor(((row[dimcount-1].qAttrExps.qValues[index].qNum) / (classLengthPlus1)));
+                           
+                            if (!isNaN(classValue)) {
+                                if (classValue === classSize + 1) {
+                                    classValue = classSize;
+                                }
+
+                                //console.info(classValue);
+
+                                return classValue * classLength;
+
+                            } else {
+                                return 'NULL';
+                            }
+                        }
+                            /*let classes = [];
+                            for (let i = 0; i <= classSize; i++) {
+                                classes.push(i *((qMax - qMin) / (classSize + 1)) + qMin);
+                            }
+
+                            let classValue = row[dimcount-1].qAttrExps.qValues[index].qNum;
+
+                            if (!isNaN(classValue)) {
+                                //let classValue = (((row[dimcount-1].qAttrExps.qValues[index].qNum) / (classLength + 1)));
+
+                               
+
+                                const isClassExp = (expr) => classValue >= expr && classValue < (expr +  ((qMax - qMin) / classSize + 1));
+                                var index = classes.findIndex(isClassExp);
+                                
+                                // map max value to the last class
+                                if (index == -1) {
+                                    index = classSize - 1; 
+                                }
+
+
+                                return index * ((qMax - qMin) / classSize);*/
+                            
+
+                           
+
+
+
+
+
+                           // var classLenght = scale.length;
+
+                            //
+
+
+ 
                         
                     }
                     return null;
@@ -702,6 +761,64 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                     }
                     return null;
                 }
+
+                function getDimensionColorScale(dataColorSize) {
+                    const palettes = qTheme.properties.palettes.data.filter(palette =>
+                        palette.propertyValue == layout.color.dimensionScheme);
+
+                    var scales;
+
+                     // on the first time no palette is selected
+                    if (palettes.length == 1) {
+                        scales = palettes[0].scale;
+                    } else {
+                        scales = qTheme.properties.palettes.data[0].scale;
+                    }
+
+                    if (Array.isArray(scales[0])) {
+                        scales = scales[Math.min(dataColorSize, scales.length - 1)];
+                    }
+
+                    return scales;
+                }
+
+
+                
+                function getMeasureColorScale(dataColorSize) {
+                    var scales;
+
+                    const palettes = qTheme.properties.scales.filter(scale =>
+                        scale.propertyValue == layout.color.measureScheme);
+                   
+                    // on the first time no palette is selected
+                    if (palettes.length == 1) {
+                        scales = palettes[0].scale;
+                    } else {
+                        scales = qTheme.properties.scales[0].scale;
+                    }
+
+                    if (Array.isArray(scales[1])) {
+                        // first scale is always "null"
+                        scales = scales[Math.min(dataColorSize, scales.length - 1)];
+                    }
+
+                    return scales;
+
+                }
+
+                function getMeasurePaletteType(dataColorSize) {
+                    const palettes = qTheme.properties.scales.filter(scale =>
+                        scale.propertyValue == layout.color.measureScheme);
+                    // determine if the color scale is gradient or class. 
+                    // initially no palette is selected
+                    if (palettes.length == 1) {
+                        return palettes[0].type;
+                    } else {
+                        return"gradient";
+                    }
+                }
+
+
 
                 function getAndFillTracesMapLineChart(qTheme) {
                     let tracesMap = new Map();
@@ -892,6 +1009,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
 
                     // add qElemNumber for selection
                     if (colorbyMeasure != null) {
+
                         coords[4].push(colorbyMeasure);
                     }
 
@@ -1130,22 +1248,27 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
         var _self = this;
         var lines = [];
         layout.refLineList.forEach(function (lineData) {
-            var lineArray;
-            try {
-                lineArray = JSON.parse('[' + lineData.line.geometry + ']');
-            } catch (e) {
-                console.info(e);
-                lineArray = [];
-            }
             var x = [];
             var y = [];
-            var i = 0;
+           
+            try {   
+                if (lineData.line.geometryX !== null && lineData.line.geometryY !== null ) {
+                    x = JSON.parse('[' + lineData.line.geometryX + ']');
+                    y = JSON.parse('[' + lineData.line.geometryY + ']');
+                }
+            } catch (e) {
+                console.info(e);
+            }
+            
+            //var x = [];
+            //var y = [];
+            /*var i = 0;
 
             lineArray.forEach(function (coord) {
                 x.push(coord[0]);
                 y.push(coord[1]);
                 i++;
-            });
+            });*/
 
             const line = {
                 x: x,

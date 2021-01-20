@@ -1,19 +1,5 @@
-define(["qlik"], function (qlik) {
+define(["./definitionChart"], function (definitionChart) {
     'use strict';
-    var app = qlik.currApp(this);
-    function getTheme() {
-        return new Promise(resolve => {
-
-            var app = qlik.currApp(this);
-            app.theme.getApplied().then(function (qtheme) {
-
-                return resolve(qtheme);
-
-
-            });
-        })
-
-    }
 
     return {
 
@@ -22,82 +8,18 @@ define(["qlik"], function (qlik) {
         items: {
 
 
-
-            /*data: {
-                uses: "data"
-            }, */
             dimensions: {
                 uses: "dimensions",
-                min: 1,
-                max: 2
+                min: definitionChart.dimensions.min,
+                max: definitionChart.dimensions.max
 
-                /*,
-                items: {
-                    colorExpression:{
-                    
-                        type: "string",
-                        
-                        label: "Color by dimension",
-                        
-                        ref:"qAttributeExpressions.0.qExpression",
-                        
-                        expression:"optional"
-                    
-                    }
-                    
-                }*/
             },
             measures: {
                 uses: "measures",
 
-                min: 1,
-                max: 4,
-                /*items: {
-                    colorExpression:{
-                    
-                        type: "string",
-                        
-                        label: "Color by expression",
-                        
-                        ref:"qAttributeExpressions.0.qExpression",
-                        
-                        expression:"optional"
-                    
-                    }
-                    
-                }
-
-                items: {
-
-                    /*singleColor: {
-                        label:"Single Color",
-                        component: "color-picker",
-                        ref:"qAttributeExpressions.0.qExpression",
-                        type: "integer",
-                        defaultValue: 3
-                    },
-
-                    colorExpression:{
-                        //show: function(layout)  { if( layout.coloring.type=='exp' ){ return true } else { return false } },
-
-                        type: "string",
-                        label: "Enter color expression",
-
-                
-                    
-                
-                        ref:"qAttributeExpressions.0.qExpression",
-                
-                        expression: "optional",
-                        defaultValue: ''
-
-                        
-                        }
-                
-                }*/
-
-
-
+                min: definitionChart.measures.min,
+                max: definitionChart.measures.min,
+      
 
             },
             sorting: {
@@ -114,18 +36,18 @@ define(["qlik"], function (qlik) {
                         label: "Max records",
                         ref: "maxRecord",
                         defaultValue: "5000",
-                        expression: "optional"
+                        expression: "always"
 
                     },
                     lines: {
                         type: 'array',
                         ref: 'refLineList',
-                        label: 'Lines',
+                        label: 'Dimensional lines',
                         itemTitleRef: 'line.label',
                         allowAdd: true,
                         allowRemove: true,
                         allowCopy: true,
-                        addTranslation: 'Add Line',
+                        addTranslation: 'Add line',
 
                         items: {
                             lineLable: {
@@ -136,10 +58,18 @@ define(["qlik"], function (qlik) {
                                 expression: "optional"
 
                             },
-                            lineGeometry: {
+                            lineGeometryX: {
                                 type: "string",
-                                label: "Line Geometry (e.g. [x1,y1], [x2,y2])",
-                                ref: "line.geometry",
+                                label: "X coords (x1,x2,...,yn)",
+                                ref: "line.geometryX",
+                                defaultValue: "",
+                                expression: "optional"
+
+                            },
+                            lineGeometryY: {
+                                type: "string",
+                                label: "Y coords (y1,y2,...,yn)",
+                                ref: "line.geometryY",
                                 defaultValue: "",
                                 expression: "optional"
 
@@ -183,16 +113,16 @@ define(["qlik"], function (qlik) {
                                     label: "Lines"
                                 }, {
                                     value: "markers",
-                                    label: "Markers"
+                                    label: "Data points"
                                 }, {
                                     value: "lines+markers",
-                                    label: "Lines+Markers"
+                                    label: "Lines+Data points"
                                 }, {
                                     value: "lines+markers+text",
-                                    label: "Lines+Markers+Text"
+                                    label: "Lines+Data points+Text"
                                 }, {
                                     value: "markers+text",
-                                    label: "Markers+Text"
+                                    label: "Data points+Text"
                                 }, {
                                     value: "text",
                                     label: "Text"
@@ -226,10 +156,10 @@ define(["qlik"], function (qlik) {
                                 ref: "line.shape",
                                 options: [{
                                     value: "linear",
-                                    label: "linear"
+                                    label: "Linear"
                                 }, {
                                     value: "spline",
-                                    label: "spline"
+                                    label: "Spline"
                                 }, {
                                     value: "vhv",
                                     label: "vhv"
@@ -263,7 +193,7 @@ define(["qlik"], function (qlik) {
                         allowAdd: true,
                         allowRemove: true,
                         allowCopy: true,
-                        addTranslation: 'Add Shape',
+                        addTranslation: 'Add shape',
                         items: {
                             lineLable: {
                                 type: "string",
@@ -395,7 +325,7 @@ define(["qlik"], function (qlik) {
                             shapeOpacity: {
                                 type: "number",
                                 component: "slider",
-                                label: "Shape Opacity ",
+                                label: "Shape opacity ",
                                 ref: "shape.opacity",
                                 min: 0,
                                 max: 1,
@@ -405,7 +335,7 @@ define(["qlik"], function (qlik) {
                             layer: {
                                 type: "string",
                                 component: "dropdown",
-                                label: "Layer Postion",
+                                label: "Layer position",
                                 ref: "shape.layer",
                                 options: [{
                                     value: "below",
@@ -429,7 +359,7 @@ define(["qlik"], function (qlik) {
 
                     Presentation: {
                         type: "items",
-                        ref: "generalSettings",
+                        ref: "perentation",
                         label: "Presentation",
                         items: {
                             mode: {
@@ -437,7 +367,8 @@ define(["qlik"], function (qlik) {
                                 component: "dropdown",
                                 label: "Mode",
                                 ref: "pres.mode",
-                                options: [{
+                                options: definitionChart.presentation.modeOptions
+                                /*[{
                                     value: "lines",
                                     label: "Lines"
                                 }, {
@@ -455,35 +386,100 @@ define(["qlik"], function (qlik) {
                                 }, {
                                     value: "text",
                                     label: "Text"
-                                }],
-                                defaultValue: "lines"
-                            },
-                            lineColor: {
-                                label: "Marker Line Color",
+                                }]*/
+                                ,
+                                defaultValue: definitionChart.presentation.modeDefaultValue//"lines"
 
-                                component: "color-picker",
-                                ref: "pres.marker.lineColor",
-                                type: "integer",
-                                defaultValue: {
-                                    color: "#7b7a78",
-                                    index: "-1"
-                                }
                             },
-                            markerlineWidth: {
+                            lineWidth: {
                                 type: "number",
                                 component: "slider",
-                                label: "Marker Line Width",
-                                ref: "pres.marker.lineWidth",
-                                min: 0,
-                                max: 4,
+                                label: "Line width",
+                                ref: "pres.line.width",
+                                min: 0.5,
+                                max: 10,
                                 step: 0.5,
-                                defaultValue: 1
-
+                                defaultValue: 1,
+                                show: definitionChart.presentation.showLineProps,
+                            },
+                            connectgaps: {
+                                type: "boolean",
+                                label: "Connect gaps",
+                                ref: "pres.line.connectgaps",
+                                defaultValue: true,
+                                show: definitionChart.presentation.showLineProps
+                            },
+                             
+                            lineStyle: {
+                                type: "string",
+                                component: "dropdown",
+                                label: "Line style",
+                                ref: "pres.line.lineStyle",
+                                options: [{
+                                    value: "solid",
+                                    label: "Solid"
+                                }, {
+                                    value: "dot",
+                                    label: "Dot"
+                                }, {
+                                    value: "dashdot",
+                                    label: "Dashdot"
+                                }, {
+                                    value: "longdash",
+                                    label: "Longdash"
+                                }],
+                                defaultValue: "solid",
+                                show: definitionChart.presentation.showLineProps,
+                            },
+                            lineShape: {
+                                type: "string",
+                                component: "dropdown",
+                                label: "Line shape",
+                                ref: "pres.line.shape",
+                                options: [{
+                                    value: "linear",
+                                    label: "Linear"
+                                }, {
+                                    value: "spline",
+                                    label: "Spline"
+                                }, {
+                                    value: "vhv",
+                                    label: "vhv"
+                                }, {
+                                    value: "hvh",
+                                    label: "hvh"
+                                }, {
+                                    value: "vh",
+                                    label: "vh"
+                                }, {
+                                    value: "hv",
+                                    label: "hv"
+                                }],
+                                defaultValue: "linear",
+                                show: definitionChart.presentation.showLineProps,
+                            },
+                            lineOpacity: {
+                                type: "number",
+                                component: "slider",
+                                label: "Line opacity ",
+                                ref: "pres.line.opacity",
+                                min: 0,
+                                max: 1,
+                                step: 0.1,
+                                defaultValue: 1,
+                                show: definitionChart.presentation.showLineProps,
+                            },
+                            lineShowMarkers: {
+                                type: "boolean",
+                                label: "Show data points",
+                                ref: "pres.line.showDataPoints",
+                                defaultValue: false,
+                                show: definitionChart.presentation.showLineProps
                             },
                             markerType: {
                                 type: "string",
                                 component: "dropdown",
-                                label: "Marker Type",
+                                label: "Data point type",
                                 ref: "pres.marker.type",
                                 options: [{
                                     value: "circle",
@@ -507,94 +503,72 @@ define(["qlik"], function (qlik) {
                                     value: "cross",
                                     label: "Cross"
                                 }],
-                                defaultValue: "circle"
+                                defaultValue: "circle",
+
+                                show: function (layout) {
+                                    return definitionChart.presentation.showMarkerPops || layout.pres.line.showDataPoints
+                                   
+                                }
                             },
                             markerSize: {
                                 type: "number",
                                 component: "slider",
-                                label: "Marker Size",
+                                label: "Data point size",
                                 ref: "pres.marker.size",
-                                min: 0,
-                                max: 20,
+                                min: 1,
+                                max: 25,
                                 step: 1,
-                                defaultValue: 10
+                                defaultValue: 10,
+                                show: function (layout) {
+                                    return definitionChart.presentation.showMarkerPops || layout.pres.line.showDataPoints
+                                   
+                                }
                             },
                             markerOpacity: {
                                 type: "number",
                                 component: "slider",
-                                label: "Marker Opacity ",
+                                label: "Data point opacity ",
                                 ref: "pres.marker.opacity",
                                 min: 0,
                                 max: 1,
                                 step: 0.1,
-                                defaultValue: 1
+                                defaultValue: 1,
+                                show: function (layout) {
+                                    return definitionChart.presentation.showMarkerPops || layout.pres.line.showDataPoints
+                                   
+                                }
                             },
-                            lineWidth: {
+                            markerLineColor: {
+                                label: "Data point line color",
+                                
+                                component: "color-picker",
+                                ref: "pres.marker.lineColor",
+                                type: "integer",
+                                defaultValue: {
+                                    color: "#7b7a78",
+                                    index: "-1"
+                                },
+                                show: function (layout) {
+                                    return definitionChart.presentation.showMarkerPops || layout.pres.line.showDataPoints
+                                   
+                                }
+                            },
+                            markerlineWidth: {
                                 type: "number",
                                 component: "slider",
-                                label: "Line Width",
-                                ref: "pres.line.width",
-                                min: 0.5,
-                                max: 10,
-                                step: 0.5,
-                                defaultValue: 1
-                            },
-                            lineStyle: {
-                                type: "string",
-                                component: "dropdown",
-                                label: "Line style",
-                                ref: "pres.line.lineStyle",
-                                options: [{
-                                    value: "solid",
-                                    label: "Solid"
-                                }, {
-                                    value: "dot",
-                                    label: "Dot"
-                                }, {
-                                    value: "dashdot",
-                                    label: "Dashdot"
-                                }, {
-                                    value: "longdash",
-                                    label: "Longdash"
-                                }],
-                                defaultValue: "solid"
-                            },
-                            lineShape: {
-                                type: "string",
-                                component: "dropdown",
-                                label: "Line shape",
-                                ref: "pres.line.shape",
-                                options: [{
-                                    value: "linear",
-                                    label: "linear"
-                                }, {
-                                    value: "spline",
-                                    label: "spline"
-                                }, {
-                                    value: "vhv",
-                                    label: "vhv"
-                                }, {
-                                    value: "hvh",
-                                    label: "hvh"
-                                }, {
-                                    value: "vh",
-                                    label: "vh"
-                                }, {
-                                    value: "hv",
-                                    label: "hv"
-                                }],
-                                defaultValue: "linear"
-                            },
-                            lineOpacity: {
-                                type: "number",
-                                component: "slider",
-                                label: "Line Opacity ",
-                                ref: "pres.line.opacity",
+                                label: "Data point line width",
+                                ref: "pres.marker.lineWidth",
                                 min: 0,
-                                max: 1,
-                                step: 0.1,
-                                defaultValue: 1
-                            },
+                                max: 4,
+                                step: 0.5,
+                                defaultValue: 1,
+                                show: function (layout) {
+                                    return definitionChart.presentation.showMarkerPops || layout.pres.line.showDataPoints
+                                   
+                                }
+
+                            }
+                           
 
                         }
                     },
@@ -612,7 +586,8 @@ define(["qlik"], function (qlik) {
                                         items: {
                                             colorMode: {
                                                 options: function e() {
-                                                    return [{
+                                                    return definitionChart.color.colorMode
+                                                    /*[{
                                                         value: "primary",
                                                         translation: "properties.colorMode.primary"
                                                     }, {
@@ -624,7 +599,7 @@ define(["qlik"], function (qlik) {
                                                     }, {
                                                         value: "byExpression",
                                                         translation: "properties.colorMode.byExpression"
-                                                    }]
+                                                    }]*/
                                                 }
                                             },
 
@@ -648,7 +623,7 @@ define(["qlik"], function (qlik) {
 
                                             colorSchemeMeasure: {
                                                 show: function (layout) {
-                                                    if (!layout.color.auto && layout.color.mode === "byMeasure" && !layout.color.useMeasureGradient) {
+                                                    if (!layout.color.auto && layout.color.mode === "byMeasure") {// && !layout.color.useMeasureGradient) {
                                                         return true;
                                                     }
                                                 }
@@ -657,7 +632,7 @@ define(["qlik"], function (qlik) {
 
                                             colorPalette: {
                                                 type: "string",
-                                                label: "Color Palette (e.g. #ff0000,#00ff00)",
+                                                label: "Color palette (e.g. #ff0000,#00ff00)",
                                                 ref: "prop.colorPalette",
                                                 defaultValue: "#ff0000,#00ff00",
                                                 expression: "optional",
@@ -673,7 +648,7 @@ define(["qlik"], function (qlik) {
 
                                             numberFormattingByMeasure: {
                                                 type: "string",
-                                                label: "Number Format D3.js (e.g. .2%)",
+                                                label: "Number format D3.js (e.g. .2%)",
                                                 ref: "coloring.numberFormat",
                                                 defaultValue: "",
                                                 show: function (layout) {
@@ -707,7 +682,7 @@ define(["qlik"], function (qlik) {
                             colorPalette: {
                                 type: "string",
                                 show: function (layout) { if (layout.coloring.type == 'exp' && layout.prop.colorCode == false) { return true } else { return false } },
-                                label: "Color Pallette (e.g. #ff0000,#00ff00)",
+                                label: "Color pallette (e.g. #ff0000,#00ff00)",
                                 ref: "prop.colorPalette",
                                 defaultValue: "",
                                 expression: "optional"
@@ -733,32 +708,32 @@ define(["qlik"], function (qlik) {
                                 type: "string",
 
                                 component: "dropdown",
-                                label: "Axis Type",
+                                label: "Axis type",
                                 ref: "xAxisSettings.type",
                                 options: [{
                                     value: "-",
-                                    label: "auto"
+                                    label: "Auto"
                                 }, {
                                     value: "linear",
-                                    label: "linear"
+                                    label: "Linear"
                                 }, {
                                     value: "log",
-                                    label: "log"
+                                    label: "Log"
                                 }, {
                                     value: "date",
-                                    label: "date"
+                                    label: "Date"
                                 }, {
                                     value: "category",
-                                    label: "category"
-                                }, {
+                                    label: "Category"
+                                }/*, {
                                     value: "multicategory",
                                     label: "multicategory"
-                                }],
+                                }*/],
                                 defaultValue: "-"
                             },
                             xTickFormat: {
                                 type: "string",
-                                label: "D3.js Tick Label Format (e.g. %Y-%m-%d)",
+                                label: "D3.js tick label format (e.g. %Y-%m-%d)",
                                 ref: "xAxisSettings.tickFormat",
                                 defaultValue: "",
                                 expression: "optional"
@@ -767,31 +742,31 @@ define(["qlik"], function (qlik) {
                             showGrid: {
                                 type: "boolean",
                                 ref: "xAxisSettings.showGrid",
-                                label: "Show Grid",
+                                label: "Show grid",
                                 defaultValue: true
                             },
                             showLine: {
                                 type: "boolean",
                                 ref: "xAxisSettings.showLine",
-                                label: "Show Line",
+                                label: "Show line",
                                 defaultValue: true
                             },
 
                             showZeroLine: {
                                 type: "boolean",
-                                label: "Show Zero Line",
+                                label: "Show zero line",
                                 ref: "xAxisSettings.showZeroLine",
                                 defaultValue: false
                             },
                             showTicklabels: {
                                 type: "boolean",
-                                label: "Show Tick Labels",
+                                label: "Show tick labels",
                                 ref: "xAxisSettings.showTicklabels",
                                 defaultValue: true
                             },
                             rangeSlider: {
                                 type: "boolean",
-                                label: "Show Rangeslider",
+                                label: "Show rangeslider",
                                 ref: "xAxisSettings.showRangeslider",
                                 defaultValue: false
                             },
@@ -799,7 +774,7 @@ define(["qlik"], function (qlik) {
                             fixedDynamicInterval: {
                                 type: "boolean",
                                 component: "switch",
-                                label: "Fixed Interval",
+                                label: "Fixed interval",
                                 ref: "xAxisSettings.fixedDynamicInterval",
                                 options: [{
                                     value: true,
@@ -810,7 +785,7 @@ define(["qlik"], function (qlik) {
                                 }],
                                 defaultValue: true
                             },
-                            minIntervalAxis: {
+                            minXIntervalAxis: {
                                 type: "string",
                                 label: "Min",
                                 ref: "xAxisSettings.minInterval",
@@ -820,7 +795,7 @@ define(["qlik"], function (qlik) {
                                     return !data.xAxisSettings.fixedDynamicInterval;
                                 }
                             },
-                            maxIntervalAxis: {
+                            maxXIntervalAxis: {
                                 type: "string",
                                 label: "Max",
                                 ref: "xAxisSettings.maxInterval",
@@ -850,27 +825,27 @@ define(["qlik"], function (qlik) {
                             yAxisType: {
                                 type: "string",
                                 component: "dropdown",
-                                label: "Axis Type",
+                                label: "Axis type",
                                 ref: "yAxisSettings.type",
                                 options: [{
                                     value: "-",
-                                    label: "auto"
+                                    label: "Auto"
                                 }, {
                                     value: "linear",
-                                    label: "linear"
+                                    label: "Linear"
                                 }, {
                                     value: "log",
-                                    label: "log"
+                                    label: "Log"
                                 }, {
                                     value: "date",
-                                    label: "date"
+                                    label: "Date"
                                 }, {
                                     value: "category",
-                                    label: "category"
-                                }, {
+                                    label: "Category"
+                                }/*, {
                                     value: "multicategory",
                                     label: "multicategory"
-                                }],
+                                }*/],
                                 defaultValue: "-"
                             },
                             yTickFormat: {
@@ -884,7 +859,7 @@ define(["qlik"], function (qlik) {
                             showGrid: {
                                 type: "boolean",
                                 ref: "yAxisSettings.showGrid",
-                                label: "Show Grid",
+                                label: "Show grid",
                                 defaultValue: true
                             },
                             showLine: {
@@ -896,20 +871,20 @@ define(["qlik"], function (qlik) {
 
                             showZeroLine: {
                                 type: "boolean",
-                                label: "Show Zero Line",
+                                label: "Show zero line",
                                 ref: "yAxisSettings.showZeroLine",
                                 defaultValue: false
                             },
                             showTicklabels: {
                                 type: "boolean",
-                                label: "Show Tick Labels",
+                                label: "Show tick labels",
                                 ref: "yAxisSettings.showTicklabels",
                                 defaultValue: true
                             },
                             fixedDynamicInterval: {
                                 type: "boolean",
                                 component: "switch",
-                                label: "Fixed Interval",
+                                label: "Fixed interval",
                                 ref: "yAxisSettings.fixedDynamicInterval",
                                 options: [{
                                     value: true,
@@ -920,7 +895,7 @@ define(["qlik"], function (qlik) {
                                 }],
                                 defaultValue: true
                             },
-                            minIntervalAxis: {
+                            minYIntervalAxis: {
                                 type: "string",
                                 label: "Min",
                                 ref: "yAxisSettings.minInterval",
@@ -930,7 +905,7 @@ define(["qlik"], function (qlik) {
                                     return !data.yAxisSettings.fixedDynamicInterval;
                                 }
                             },
-                            maxIntervalAxis: {
+                            maxYIntervalAxis: {
                                 type: "string",
                                 label: "Max",
                                 ref: "yAxisSettings.maxInterval",
@@ -1081,7 +1056,7 @@ define(["qlik"], function (qlik) {
                             showLegend: {
                                 type: "boolean",
                                 ref: "legend.showLegend",
-                                label: "Show Legend",
+                                label: "Show legend",
                                 defaultValue: true
                             },
                             orientation: {
@@ -1096,7 +1071,7 @@ define(["qlik"], function (qlik) {
                                     value: "h",
                                     label: "Horizontal"
                                 }],
-                                defaultValue: "vh"
+                                defaultValue: "v"
                             }
 
 
@@ -1145,7 +1120,7 @@ define(["qlik"], function (qlik) {
                                 },
                                 toolbarBgColor: {
                                     type: "string",
-                                    label: "Toolbar/Moodbar BgColor",
+                                    label: "Toolbar/Moodbar bg-color",
                                     ref: "prop.toolbar.bgColor",
                                     defaultValue: "='rgba(255,255,255,0)'",
                                     expression: "optional"
@@ -1164,14 +1139,14 @@ define(["qlik"], function (qlik) {
                                 minimalMode: {
                                     type: "boolean",
                                     component: "switch",
-                                    label: "Chart Mode",
+                                    label: "Chart mode",
                                     ref: "prop.standardMode",
                                     options: [{
                                         value: true,
-                                        label: "Standard Mode"
+                                        label: "Standard mode"
                                     }, {
                                         value: false,
-                                        label: "Max. Performance Mode"
+                                        label: "Max. performance mode"
                                     }],
                                     defaultValue: true
                                 }
