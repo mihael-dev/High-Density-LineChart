@@ -18,7 +18,7 @@ define(["./definitionChart"], function (definitionChart) {
                 uses: "measures",
 
                 min: definitionChart.measures.min,
-                max: definitionChart.measures.min,
+                max: definitionChart.measures.max,
       
 
             },
