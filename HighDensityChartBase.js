@@ -1,4 +1,4 @@
-define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201201 cvh 3: including italy locations
+define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //20201201 cvh 3: including italy locations
 ], function (qlik, Plotly, localeIt) {
     'use strict';
    
@@ -406,7 +406,7 @@ define(["qlik", "./lib/plotly-latest.min", "./locale/plotly-locale-it"   //20201
                     let tooltipSuffix;
                     if (chartType === "line") { 
                         tooltipSuffix = '<br><b>' + '' + '%{text}</b>' +
-                            '<br>{' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{y}';
+                            '<br>' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{y}';
                     } else if (chartType === "scatter") {
                         tooltipSuffix = '<br><b>' + dimTitle + ': %{text}</b>' +
                             '<br>' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{x}' +
