@@ -15,8 +15,8 @@ define(["qlik", "./definition", "./HighDensityChartBase", "./lib/plotly-2.0.0.mi
 					qDimensions: [],
 					qMeasures: [],
 					qInitialDataFetch: [{
-						qWidth: 5,
-						qHeight: 2000
+						qWidth: definitionChart.qInitialDataFetch.qWidth,
+						qHeight: definitionChart.qInitialDataFetch.qHeight
 					}]
 				},
 				selectionMode: "CONFIRM"

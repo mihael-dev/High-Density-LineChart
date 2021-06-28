@@ -49,24 +49,9 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                     meacount = hypercube.qMeasureInfo.length,
 
                     dimTitle = hypercube.qDimensionInfo[0].qFallbackTitle;
-
-                    //meaX = hypercube.qMeasureInfo[0].qFallbackTitle,
-                   // meaXFormatType = hypercube.qMeasureInfo[0].qNumFormat.qType,
-                    //meaXFormatFmt = hypercube.qMeasureInfo[0].qNumFormat.qFmt,
-
-                    //meaY = hypercube.qMeasureInfo[1].qFallbackTitle,
-                    //meaYFormatType = hypercube.qMeasureInfo[1].qNumFormat.qType,
-                    //meaYFormatFmt = hypercube.qMeasureInfo[1].qNumFormat.qFmt,
-
-                    //app = qlik.currApp(this);
-                
-                    
-
-                //var lastrow = 0
+    
                 var X = [],
                     Y = [];
-
-               
 
                
                 var tooltipData = [];
@@ -613,6 +598,10 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                 
 
                 function getFormattedCellValue(cell, axis) {
+                    
+                    if(cell.qIsNull) {
+                        return null;
+                    }
                     // Date conversion X
                     if (axis.type == 'date' && cell.qNum != 'NaN') {
                         // Qlik Date Date(0) = 30.12.1899 > Java Script data Date(0) = 01.01.1970
@@ -853,9 +842,7 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                             } else {
                             
                                 var key = row[1].qText;
-                               
-                                
-                                //addCellToPointMap(tracesMap, key, row[0], row[2]);
+           
                                 addRowToTracesMap(tracesMap, key, row[0], row[2],  row[1].qText + ',' + row[0].qText, [row[0].qElemNumber, row[1].qElemNumber], colorByMeasure, colorByDim_Expr, row[0].qAttrExps);
                                 
                             }
@@ -879,13 +866,6 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                             var key = getTraceKey(row);
                             var colorbyMeasure = getValueColorbyMeasure(row);
 
-                           /* if (layout.color.mode === "byMeasure") {
-                                const isColorExp = (expr) => expr.id === "colorByAlternative";
-                                var index = hypercube.qDimensionInfo[dimcount-1].qAttrExprInfo.findIndex(isColorExp);
-
-                                colorbyMeasure = row[0].qAttrExps.qValues[index].qNum;
-                            }*/
-         
                             addRowToTracesMap(tracesMap, key, row[1], row[2], row[0].qText, [row[0].qElemNumber], colorbyMeasure, null, row[0].qAttrExps);
 
 
@@ -912,31 +892,7 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                     } else {
 
                         fillTracesMapMaxPerformanceMode(tracesMap);
-                        //var row = _self.backendApi.getDataRow(0);
-                       /* _self.backendApi.eachDataRow(function (rownum, row) {
-                            var x;
-                            var y; 
-                            var key;
-                            var coords;
-                            
-                            try {
-                                x = JSON.parse('[' + row[1].qText + ']');
-                                y = JSON.parse('[' + row[2].qText + ']');
-                                
-                                
-                            } catch (e) {
-                                console.info(e);
-                                x = [];
-                                y = [];
-                            }
-
-                            //key = hypercube.qDimensionInfo[0].qFallbackTitle;
-                            key = row[0].qText;
-                            
-                            coords = [x, y, [], [], [], []];
-
-                            tracesMap.set(key, coords);
-                        });*/
+                      
                     }
 
 
@@ -1020,8 +976,13 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                         var tp = [];
                         tooltipData.qValues.forEach(function (tooltipRow, key) {
                             //Use tmp array for pushing array into another array	
-
-                            tp.push(tooltipRow.qText);
+                            let toolText = tooltipRow.qText;
+                            if (toolText !== null && toolText !== undefined) {
+                                tp.push(tooltipRow.qText);
+                            } else {
+                                tp.push('-');
+                            }
+                            
                         });
                         coords[6].push(tp);
                     }
