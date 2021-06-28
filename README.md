@@ -59,3 +59,10 @@ e.g. Regression, Median
 - No support for selections on axis and legend.
 - Printing of the high-density line chart should work up to 50k points.
 - Extension tested with Sep2020/Nov2020 release
+
+
+**Release:**
+- 2021-06-28
+	* Upgrade Plotly 2.0
+	* Bugfix: Handling null values in trace and tooltip
+	* Bugfix: line chart increase qInitialDataFetch (Width): 20
