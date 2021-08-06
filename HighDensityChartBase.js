@@ -1,4 +1,4 @@
-define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //20201201 cvh 3: including italy locations
+define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //20201201 cvh 3: including italy locations
 ], function (qlik, Plotly, localeIt) {
     'use strict';
    
@@ -132,7 +132,7 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                 if (!layout.yAxisSettings.fixedDynamicInterval) {
                     graph_layout.yaxis.range = [ layout.yAxisSettings.minInterval, layout.yAxisSettings.maxInterval];
                 }
-
+                
 
                  //20201201 cvh 2: add dynamic x axis (min and max)
                 /* var minValxAxis;
@@ -605,10 +605,12 @@ define(["qlik", "./lib/plotly-2.0.0.min", "./locale/plotly-locale-it"   //202012
                     // Date conversion X
                     if (axis.type == 'date' && cell.qNum != 'NaN') {
                         // Qlik Date Date(0) = 30.12.1899 > Java Script data Date(0) = 01.01.1970
-                        var qlikDateMillis = (cell.qNum - 25569) * 24 * 60 * 60 * 1000;
+                        //var qlikDateMillis = (cell.qNum - (25569) * 24 * 60 * 60 * 1000;
                         // remove the calculation in local time
-                        qlikDateMillis = qlikDateMillis + new Date().getTimezoneOffset() * 60 * 1000;
+                        //qlikDateMillis = qlikDateMillis + new Date().getTimezoneOffset() * 60 * 1000;
 
+                        // 2021-08-07 FIX: Time conversion with milliseconds did not work 
+                        var qlikDateMillis = Date.parse(cell.qText);
                         return qlikDateMillis;
 
                     } else {
