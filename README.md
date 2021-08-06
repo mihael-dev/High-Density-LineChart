@@ -66,3 +66,7 @@ e.g. Regression, Median
 	* Upgrade Plotly 2.0
 	* Bugfix: Handling null values in trace and tooltip
 	* Bugfix: line chart increase qInitialDataFetch (Width): 20
+
+- 2021-08-07: 
+	* FiX Date conversion
+	* Upgrade Plotly 2.2
