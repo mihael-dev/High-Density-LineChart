@@ -605,13 +605,14 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                     // Date conversion X
                     if (axis.type == 'date' && cell.qNum != 'NaN') {
                         // Qlik Date Date(0) = 30.12.1899 > Java Script data Date(0) = 01.01.1970
+                        
+                        // UTC date
                         var qlikDateMillis = (cell.qNum - (25569)) * 24 * 60 * 60 * 1000;
-                                             
+
                         // 2021-08-07 FIX: Time conversion with milliseconds did not work 
-                        qlikDateMillis = new Date(qlikDateMillis - new Date(qlikDateMillis).getTimezoneOffset() * 60 * 1000).getTime();
-                        // remove the calculation in local time
-                     
-                        qlikDateMillis = qlikDateMillis + new Date().getTimezoneOffset() * 60 * 1000;
+                    
+                        // UTC Date needs to be transformed in local time
+                        qlikDateMillis = qlikDateMillis + new Date(qlikDateMillis).getTimezoneOffset() * 60 * 1000;
 
                         return qlikDateMillis;
 
