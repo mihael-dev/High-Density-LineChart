@@ -630,14 +630,14 @@ define(["./definitionChart"], function (definitionChart) {
 
                                             },
 
-                                            colorPalette: {
+                                            colorPaletteExpr: {
                                                 type: "string",
                                                 label: "Color palette (e.g. #ff0000,#00ff00)",
-                                                ref: "prop.colorPalette",
-                                                defaultValue: "#ff0000,#00ff00",
+                                                ref: "prop.colorPaletteExpr",
+                                                defaultValue: "",
                                                 expression: "optional",
                                                 show: function (layout) {
-                                                    if (!layout.color.auto && layout.color.mode === "byExpression" && !layout.color.expressionIsColor) {
+                                                    if (!layout.color.auto && (layout.color.mode === "byExpression" && !layout.color.expressionIsColor)) {
                                                         return true;
                                                     } else {
                                                         return false;
@@ -645,7 +645,21 @@ define(["./definitionChart"], function (definitionChart) {
                                                 },
 
                                             },
+                                            colorPaletteDim: {
+                                                type: "string",
+                                                label: "Color palette (e.g. #ff0000,#00ff00)",
+                                                ref: "prop.colorPaletteDim",
+                                                defaultValue: "",
+                                                expression: "optional",
+                                                show: function (layout) {
+                                                    if (!layout.color.auto &&  layout.color.mode === "byDimension") {
+                                                        return true;
+                                                    } else {
+                                                        return false;
+                                                    }
+                                                },
 
+                                            },
                                             numberFormattingByMeasure: {
                                                 type: "string",
                                                 label: "Number format D3.js (e.g. .2%)",

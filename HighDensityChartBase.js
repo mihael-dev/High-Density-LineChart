@@ -165,7 +165,7 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                 var colorscale;
 
                  // line chart color by Dimension with 2 dimensions
-                 var dimColorArray;
+                var dimColorArray;
                 if (chartType === 'line' && (layout.color.mode == "byDimension" || layout.color.mode == "byExpression")) {
                     var dimColorSet = new Set();
                     tracesMap.forEach(function (coords, key) {
@@ -174,7 +174,7 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                         }
                     });
 
-                    dimColorArray =  Array.from(dimColorSet);
+                    dimColorArray = Array.from(dimColorSet);
                 }
 
                 // create data traces
@@ -199,10 +199,20 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                         
                     } else if (layout.color.mode === "byDimension") {
 
+                      
+
                         // line chart color by Dimension with 2 dimensions
-                        if (dimColorArray != null ) {
+                        if (dimColorArray != null && dimcount == 2) {
                           
-                            var scales = getDimensionColorScale(dimColorArray.length - 1);
+                            //var scales = getDimensionColorScale(dimColorArray.length - 1);
+                            var scales;
+                            if (layout.prop.colorPaletteDim !== null && layout.prop.colorPaletteDim !== '') {
+                                scales = layout.prop.colorPaletteDim.split(",");
+                            } else {
+                                scales = getDimensionColorScale(tracesMap.size - 1);
+                            }
+
+
                             // if dimension expression can't be calculated
                             if (scales !== undefined) {
                                 color = scales[dimColorArray.indexOf(coords[5]) % scales.length].trim();
@@ -211,7 +221,12 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                             }
 
                         } else {
-                            var scales = getDimensionColorScale(tracesMap.size - 1);
+                            var scales;//getDimensionColorScale(tracesMap.size - 1);
+                            if (layout.prop.colorPaletteDim !== undefined && layout.prop.colorPaletteDim !== null && layout.prop.colorPaletteDim !== '') {
+                                scales = layout.prop.colorPaletteDim.split(",");
+                            } else {
+                                scales = getDimensionColorScale(tracesMap.size - 1);
+                            }
 
                             color = scales[i % scales.length].trim();
                         }
@@ -241,27 +256,30 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                         
 
                     } else if (layout.color.mode === "byExpression" && !layout.color.expressionIsColor) {
-                       
-                        let colorIndex;
-                        let colorsLength;
-                       
-                        if (dimColorArray != null ) {
-                            colorIndex = dimColorArray.indexOf(coords[5]);
-                            colorsLength = dimColorArray.length - 1;
-                            key = coords[5];
-                        } else {
-                            colorIndex = i;
-                            colorsLength = tracesMap.size - 1;
-                        }
+                        try {
+                            let colorIndex;
+                            let colorsLength;
+                        
+                            if (dimColorArray != null ) {
+                                colorIndex = dimColorArray.indexOf(coords[5]);
+                                colorsLength = dimColorArray.length - 1;
+                                key = coords[5];
+                            } else {
+                                colorIndex = i;
+                                colorsLength = tracesMap.size - 1;
+                            }
 
-                        var scales;//getDimensionColorScale(tracesMap.size - 1);
-                        if (layout.prop.colorPalette !== null && layout.prop.colorPalette !== '') {
-                            scales = layout.prop.colorPalette.split(",");
-                        } else {
-                            scales = getDimensionColorScale(colorsLength);
+                            var scales;//getDimensionColorScale(tracesMap.size - 1);
+                            if (layout.prop.colorPaletteExpr !== undefined && layout.prop.colorPaletteExpr !== null && layout.prop.colorPaletteExpr !== '') {
+                                scales = layout.prop.colorPaletteExpr.split(",");
+                            } else {
+                                scales = getDimensionColorScale(colorsLength);
+                            }
+                        
+                            color = scales[colorIndex % scales.length].trim();
+                        } catch (e) {
+                            color = qTheme.properties.dataColors.nullColor;
                         }
-                    
-                        color = scales[colorIndex % scales.length].trim();
                     
                     }
 
