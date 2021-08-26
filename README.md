@@ -57,8 +57,9 @@ e.g. Regression, Median
 - Number formats in the measures are ignored. Use Tick Format in the X Axis/Y Axis configuration instead. 
 - No support for colors in Master measures and dimensions.
 - No support for selections on axis and legend.
-- Printing of the high-density line chart should work up to 50k points.
-- Extension tested with Sep2020/Nov2020 release
+- Printing of the high-density line chart should work up to 50k points (only QSE Windows).
+- Extension tested with Sep2020/Nov2020/Feb2021/May2021 release
+- New versions of the extension may require that existing objects need to be replaced
 
 
 **Release:**
@@ -70,3 +71,6 @@ e.g. Regression, Median
 - 2021-08-07: 
 	* FiX Date conversion
 	* Upgrade Plotly 2.2
+
+- 2021-08-26: 
+	* Custom color palette for color by dimension 
