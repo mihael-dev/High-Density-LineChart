@@ -74,3 +74,7 @@ e.g. Regression, Median
 
 - 2021-08-26: 
 	* Custom color palette for color by dimension 
+
+- 2021-12-23:
+	* Upgrade Plotly 2.8.3
+	* Fix: Mouse over chart wrong legend https://github.com/mihael-dev/High-Density-LineChart/issues/3
