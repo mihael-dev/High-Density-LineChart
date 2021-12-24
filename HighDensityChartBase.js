@@ -1,4 +1,4 @@
-define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //20201201 cvh 3: including italy locations
+define(["qlik", "./lib/plotly-2.8.3.min", "./locale/plotly-locale-it"   //20201201 cvh 3: including italy locations
 ], function (qlik, Plotly, localeIt) {
     'use strict';
    
@@ -378,7 +378,7 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                             }
                         },
 
-                        hoverinfo: 'x+y+text',
+                        hoverinfo: 'name+x+y+text',
 
                         hovertemplate:
                             tooltipLablesTop +
@@ -409,7 +409,7 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                     let tooltipSuffix;
                     if (chartType === "line") { 
                         tooltipSuffix = '<br><b>' + '' + '%{text}</b>' +
-                            '<br>' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{y}';
+                            '<br>' + ((meacount > 1) ? '%{fullData.name}' : hypercube.qMeasureInfo[0].qFallbackTitle) + ': %{y}';
                     } else if (chartType === "scatter") {
                         tooltipSuffix = '<br><b>' + dimTitle + ': %{text}</b>' +
                             '<br>' + hypercube.qMeasureInfo[0].qFallbackTitle + ': %{x}' +
@@ -866,7 +866,7 @@ define(["qlik", "./lib/plotly-2.2.0.min", "./locale/plotly-locale-it"   //202012
                             
                                 var key = row[1].qText;
            
-                                addRowToTracesMap(tracesMap, key, row[0], row[2],  row[1].qText + ',' + row[0].qText, [row[0].qElemNumber, row[1].qElemNumber], colorByMeasure, colorByDim_Expr, row[0].qAttrExps);
+                                addRowToTracesMap(tracesMap, key, row[0], row[2],  row[1].qText + ', ' + row[0].qText, [row[0].qElemNumber, row[1].qElemNumber], colorByMeasure, colorByDim_Expr, row[0].qAttrExps);
                                 
                             }
                         });

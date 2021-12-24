@@ -1,4 +1,4 @@
-define(["qlik", "./definition", "./HighDensityChartBase", "./lib/plotly-2.2.0.min", "text!./style.css",
+define(["qlik", "./definition", "./HighDensityChartBase", "./lib/plotly-2.8.3.min", "text!./style.css",
 "./definitionChart"
 ],
 
